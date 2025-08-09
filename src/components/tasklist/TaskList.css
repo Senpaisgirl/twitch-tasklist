@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
+
+.tasklist-container {
+    font-family: 'Baloo 2', cursive;
+    background-color: rgba(255, 240, 245, 0.8); /*pastel pink */
+    padding: 10px 15px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 182, 193, 0.8); /*light pink border */
+    width: 250px;
+    color: #5b2b33; /*dark pink text */
+    font-size: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tasklist-title {
+    margin: 0 0 8px;
+    font-size: 20px;
+    color: #d36b84; /*soft pink */
+    text-align: center;
+}
+
+.tasklist-empty {
+    text-align: left;
+    opacity: 0.6;
+}
+
+.tasklist-user {
+    margin-bottom: 8px;
+}
+
+.tasklist-username {
+    font-size: 16px;
+    color: #b5475e; /* muted pink */
+}
+
+.tasklist-items {
+    margin: 0;
+    padding-left: 18px;
+    list-style: disc;
+}
+
+.tasklist-item {
+    color: #5b2b33; /*dark pink */
+}
+
+.tasklist-item.done {
+    text-decoration: line-through;
+    color: #999; /* muted gray for completed tasks */;
+}
