@@ -30,13 +30,30 @@ export default function TaskList() {
     }, [tasks]);
 
     useEffect(() => {
-        if (!twitchClientRef.current) {
+        // if (!twitchClientRef.current) {
+        //     twitchClientRef.current = new tmi.Client({
+        //         options: { debug: true },
+        //         identity: {
+        //             username: "penpais_beaple",
+
+        //             password: `oauth:${token}`,
+        //         },
+        //         channels: ["senpaisgirl"],
+        //     });
+        // }
+
+        async function initClient() {
+            const token = await fetchAccessToken();
+            if (!token) {
+                console.error("Failed to fetch access token");
+                return;
+            }
+
             twitchClientRef.current = new tmi.Client({
                 options: { debug: true },
                 identity: {
                     username: "penpais_beaple",
-
-                    password: "",
+                    password: `oauth:${token}`,
                 },
                 channels: ["senpaisgirl"],
             });
@@ -136,7 +153,8 @@ export default function TaskList() {
                     setTasks({});
                 }
                 
-                console.log(TaskList);
+                console.log(`Received command: ${cmd} from ${usernameKey}`);
+                
                 if (cmd === "!clearuser" && isModOrStreamer) {
                     let targetUser = parts[1]?.toLowerCase();
                     if (!targetUser) return;
@@ -153,20 +171,14 @@ export default function TaskList() {
                     });
                 }
             });
-        }
 
-        async function initClient() {
-            const token = await fetchAccessToken();
-            if (!token) {
-                console.error("Failed to fetch access token");
-                return;
-            }
-
-            twitchClientRef.current.opts.identity.password = `oauth:${token}`;
-
-            if (!twitchClientRef.current.readyState() !== "OPEN") {
+            if (twitchClientRef.current.readyState() !== "OPEN") {
+            try {
                 await twitchClientRef.current.connect();
+            } catch (error) {
+                console.error("Failed to connect Twitch client:", error);
             }
+        }
         }
 
         initClient();
