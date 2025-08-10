@@ -7,8 +7,29 @@ export default function TaskList() {
     const [tasks, setTasks] = useState({});
     const twitchClientRef = useRef(null);
 
+    //Load tasks from localStorage on component mount
     useEffect(() => {
+        const storedTasks = localStorage.getItem("twitchtasks");
+        if (storedTasks) {
+            try {
+                const parsedTasks = JSON.parse(storedTasks);
+                setTasks(parsedTasks);
+            } catch (error) {
+                console.error("Failed to parse tasks from localStorage:", error);
+            }
+        }
+    }, []);
 
+    //Save tasks to localStorage whenever tasks state changes
+    useEffect(() => {
+        if (Object.keys(tasks).length === 0) {
+            localStorage.removeItem("twitchtasks");
+        } else {
+            localStorage.setItem("twitchtasks", JSON.stringify(tasks));
+        }
+    }, [tasks]);
+
+    useEffect(() => {
         if (!twitchClientRef.current) {
             twitchClientRef.current = new tmi.Client({
                 options: { debug: true },

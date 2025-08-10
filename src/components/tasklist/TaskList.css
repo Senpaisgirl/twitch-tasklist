@@ -3,19 +3,21 @@
 
 .tasklist-container {
     font-family: 'Baloo 2', cursive;
-    background-color: rgba(255, 240, 245, 0.8); /*pastel pink */
-    padding: 10px 15px;
-    border-radius: 15px;
-    border: 2px solid rgba(255, 182, 193, 0.8); /*light pink border */
-    width: 250px;
+    background-color: rgba(255, 240, 245, 0.9); /*pastel pink */
+    padding: 6px 15px;
+    border-radius: 45px;
+    border: 5px solid rgba(255, 182, 193, 0.8); /*light pink border */
+    width: 359px;
+    height: 656px;
     color: #5b2b33; /*dark pink text */
     font-size: 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
 }
 
 .tasklist-title {
-    margin: 0 0 8px;
-    font-size: 20px;
+    margin: 0 0 0px;
+    font-size: 22px;
     color: #d36b84; /*soft pink */
     text-align: center;
 }
@@ -26,11 +28,11 @@
 }
 
 .tasklist-user {
-    margin-bottom: 8px;
+    margin-bottom: 0px;
 }
 
 .tasklist-username {
-    font-size: 16px;
+    font-size: 17px;
     color: #b5475e; /* muted pink */
 }
 
