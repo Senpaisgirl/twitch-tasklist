@@ -48,14 +48,27 @@ export default function TaskList() {
                 console.error("Failed to fetch access token");
                 return;
             }
+            console.log("Fetched Twitch OAuth token:", token);
 
             twitchClientRef.current = new tmi.Client({
                 options: { debug: true },
+                connection: {
+                    reconnect: true,
+                    secure: true,
+                },
                 identity: {
                     username: "penpais_beaple",
                     password: `oauth:${token}`,
                 },
                 channels: ["senpaisgirl"],
+            });
+
+            twitchClientRef.current.on("connected", (address, port) => {
+                console.log(`Connected to Twitch chat at ${address}:${port}`);
+            });
+
+            twitchClientRef.current.on("disconnected", (reason) => {
+                console.warn(`Disconnected from Twitch chat: ${reason}`);
             });
 
             twitchClientRef.current.on("message", (channel, tags, message) => {
