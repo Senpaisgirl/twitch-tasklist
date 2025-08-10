@@ -1,4 +1,4 @@
-const API_CALL = "https://9e74ab69-e2c5-4922-8744-e12d7bc1e324-00-3orw17jg8x8ec.spock.replit.dev";
+const API_CALL = "https://9e74ab69-e2c5-4922-8744-e12d7bc1e324-00-3orw17jg8x8ec.spock.replit.dev/refresh-token";
 
 export async function fetchAccessToken() {
   try {
