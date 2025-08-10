@@ -166,8 +166,6 @@ export default function TaskList() {
                     setTasks({});
                 }
                 
-                console.log(`Received command: ${cmd} from ${usernameKey}`);
-                
                 if (cmd === "!clearuser" && isModOrStreamer) {
                     let targetUser = parts[1]?.toLowerCase();
                     if (!targetUser) return;
