@@ -1,6 +1,6 @@
 export async function fetchAccessToken() {
   try {
-    const response = await fetch("http://localhost:3002/refresh-token");
+    const response = await fetch("https://9e74ab69-e2c5-4922-8744-e12d7bc1e324-00-3orw17jg8x8ec.spock.replit.dev/refresh-token");
     if (!response.ok) throw new Error("Failed to fetch token");
     const data = await response.json();
     return data.access_token;  // new access token
