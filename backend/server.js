@@ -4,8 +4,9 @@ const axios = require('axios');
 const fs = require('fs');
 const app = express();
 
-const CLIENT_ID = 'az1h41aop93b49b11taauv91hcgrrp';
-const CLIENT_SECRET = 'cehsk74opps9m4f9zs256q10igkbjg';
+require('dotenv').config(); // Load environment variables from .env file
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const TOKEN_FILE = './refresh_token.txt';
 
 let REFRESH_TOKEN = ' '; 
