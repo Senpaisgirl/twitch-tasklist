@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/twitch-tasklist/static/css/main.5c498130.css",
-    "main.js": "/twitch-tasklist/static/js/main.3c9fdec6.js",
+    "main.js": "/twitch-tasklist/static/js/main.035749c8.js",
     "static/js/453.54f85e5b.chunk.js": "/twitch-tasklist/static/js/453.54f85e5b.chunk.js",
     "index.html": "/twitch-tasklist/index.html",
     "main.5c498130.css.map": "/twitch-tasklist/static/css/main.5c498130.css.map",
-    "main.3c9fdec6.js.map": "/twitch-tasklist/static/js/main.3c9fdec6.js.map",
+    "main.035749c8.js.map": "/twitch-tasklist/static/js/main.035749c8.js.map",
     "453.54f85e5b.chunk.js.map": "/twitch-tasklist/static/js/453.54f85e5b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.5c498130.css",
-    "static/js/main.3c9fdec6.js"
+    "static/js/main.035749c8.js"
   ]
 }
