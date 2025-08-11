@@ -4,58 +4,7 @@ import { fetchAccessToken } from "../../utils/auth";
 import "./TaskList.css";
 
 export default function TaskList() {
-    const [tasks, setTasks] = useState({
-  user1: {
-    displayName: "Alice",
-    tasks: [
-      { text: "Task A1", done: false, repeating: false, current: true },
-      { text: "Task A2", done: false, repeating: true },
-      { text: "Task A3", done: true, repeating: false },
-      { text: "Task A4", done: false, repeating: false },
-      { text: "Task A5", done: false, repeating: false },
-    ],
-  },
-  user2: {
-    displayName: "Bob",
-    tasks: [
-      { text: "Task B1", done: true, repeating: false },
-      { text: "Task B2", done: false, repeating: false, current: true },
-      { text: "Task B3", done: false, repeating: true },
-      { text: "Task B4", done: false, repeating: false },
-      { text: "Task B5", done: false, repeating: false },
-    ],
-  },
-  user3: {
-    displayName: "Charlie",
-    tasks: [
-      { text: "Task C1", done: false, repeating: false },
-      { text: "Task C2", done: false, repeating: true },
-      { text: "Task C3", done: true, repeating: false, current: true },
-      { text: "Task C4", done: false, repeating: false },
-      { text: "Task C5", done: false, repeating: false },
-    ],
-  },
-  user4: {
-    displayName: "Dana",
-    tasks: [
-      { text: "Task D1", done: false, repeating: false },
-      { text: "Task D2", done: true, repeating: false },
-      { text: "Task D3", done: false, repeating: true, current: true },
-      { text: "Task D4", done: false, repeating: false },
-      { text: "Task D5", done: false, repeating: false },
-    ],
-  },
-  user5: {
-    displayName: "Eve",
-    tasks: [
-      { text: "Task E1", done: false, repeating: false },
-      { text: "Task E2", done: false, repeating: true },
-      { text: "Task E3", done: false, repeating: false },
-      { text: "Task E4", done: true, repeating: false, current: true },
-      { text: "Task E5", done: false, repeating: false },
-    ],
-  },
-});
+    const [tasks, setTasks] = useState({});
 
     const twitchClientRef = useRef(null);
 
@@ -228,14 +177,40 @@ export default function TaskList() {
                 }
 
                 if (cmd === "!done") {
-                    const index = parseInt(parts[1]) - 1;
-                    if (isNaN(index)) return;
+                    const restOfMessage = parts.slice(1).join(" ");
+                    const [done, newCurrentTask] = restOfMessage.split(";").map(t => t.trim());
+
+                    const doneIndex = parseInt(parts[1]) - 1;
+                    if (isNaN(doneIndex)) return;
+
+                    let newCurrentIndex = null;
+                    if (newCurrentTask !== undefined) {
+                        const parsedNewCurrentIndex = parseInt(newCurrentTask) - 1;
+                        if (!isNaN(parsedNewCurrentIndex)) {
+                            newCurrentIndex = parsedNewCurrentIndex;
+                        }
+                    }
+
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
                         if (!userData) return prevTasks;
                         const userTasks = [...userData.tasks];
-                        if (index < 0 || index >= userTasks.length) return prevTasks;
-                        userTasks[index] = { ...userTasks[index], done: true };
+
+                        userTasks[doneIndex] = { ...userTasks[doneIndex], done: true };
+
+                        //if new current task is specified, set it as current
+                        if (newCurrentTask !== null && userTasks[newCurrentIndex]) {
+                            userTasks[doneIndex].current = false; // reset
+                            if (!userTasks[newCurrentIndex].repeating) {
+                                userTasks[newCurrentIndex].current = true; // set new current task
+                            }
+                        } else {
+                            //otherwise pick first non-repeating task as current
+                            userTasks[doneIndex].current = false; //reset
+                            const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
+                            if (firstNotDone) firstNotDone.current = true;
+                        }
+
                         return {
                             ...prevTasks,
                             [usernameKey]: {
@@ -255,6 +230,15 @@ export default function TaskList() {
                         const userTasks = [...userData.tasks];
                         if (index < 0 || index >= userTasks.length) return prevTasks;
                         userTasks[index] = { ...userTasks[index], done: false };
+
+                        userTasks[index] = {...userTasks[index], current: false }; // reset current if undone
+
+                        const hasCurrent = userTasks.some(t => t.current);
+                        if (!hasCurrent) {
+                            userTasks.forEach(t => t.current = false); // reset all current
+                            userTasks[index].current = true; // set undone task as current
+                        }
+
                         return {
                             ...prevTasks,
                             [usernameKey]: {
