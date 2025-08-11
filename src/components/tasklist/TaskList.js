@@ -4,8 +4,64 @@ import { fetchAccessToken } from "../../utils/auth";
 import "./TaskList.css";
 
 export default function TaskList() {
-    const [tasks, setTasks] = useState({});
+    const [tasks, setTasks] = useState({
+  user1: {
+    displayName: "Alice",
+    tasks: [
+      { text: "Task A1", done: false, repeating: false, current: true },
+      { text: "Task A2", done: false, repeating: true },
+      { text: "Task A3", done: true, repeating: false },
+      { text: "Task A4", done: false, repeating: false },
+      { text: "Task A5", done: false, repeating: false },
+    ],
+  },
+  user2: {
+    displayName: "Bob",
+    tasks: [
+      { text: "Task B1", done: true, repeating: false },
+      { text: "Task B2", done: false, repeating: false, current: true },
+      { text: "Task B3", done: false, repeating: true },
+      { text: "Task B4", done: false, repeating: false },
+      { text: "Task B5", done: false, repeating: false },
+    ],
+  },
+  user3: {
+    displayName: "Charlie",
+    tasks: [
+      { text: "Task C1", done: false, repeating: false },
+      { text: "Task C2", done: false, repeating: true },
+      { text: "Task C3", done: true, repeating: false, current: true },
+      { text: "Task C4", done: false, repeating: false },
+      { text: "Task C5", done: false, repeating: false },
+    ],
+  },
+  user4: {
+    displayName: "Dana",
+    tasks: [
+      { text: "Task D1", done: false, repeating: false },
+      { text: "Task D2", done: true, repeating: false },
+      { text: "Task D3", done: false, repeating: true, current: true },
+      { text: "Task D4", done: false, repeating: false },
+      { text: "Task D5", done: false, repeating: false },
+    ],
+  },
+  user5: {
+    displayName: "Eve",
+    tasks: [
+      { text: "Task E1", done: false, repeating: false },
+      { text: "Task E2", done: false, repeating: true },
+      { text: "Task E3", done: false, repeating: false },
+      { text: "Task E4", done: true, repeating: false, current: true },
+      { text: "Task E5", done: false, repeating: false },
+    ],
+  },
+});
+
     const twitchClientRef = useRef(null);
+
+    // Refs for autoscroll
+    const containerRef = useRef(null);
+    const listRef = useRef(null);
 
     //Load tasks from localStorage on component mount
     useEffect(() => {
@@ -30,18 +86,6 @@ export default function TaskList() {
     }, [tasks]);
 
     useEffect(() => {
-        // if (!twitchClientRef.current) {
-        //     twitchClientRef.current = new tmi.Client({
-        //         options: { debug: true },
-        //         identity: {
-        //             username: "penpais_beaple",
-
-        //             password: `oauth:${token}`,
-        //         },
-        //         channels: ["senpaisgirl"],
-        //     });
-        // }
-
         async function initClient() {
             const token = await fetchAccessToken();
             if (!token) {
@@ -87,12 +131,79 @@ export default function TaskList() {
                 if (cmd === "!task") {
                     const taskText = parts.slice(1).join(" ");
                     if (!taskText) return;
+
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey] || { displayName, tasks: [] };
-                        const updatedTasks = [...userData.tasks, { text: taskText, done: false }];
+
+                        const newTaskEntries = taskText.split(";").map( text => ({
+                            text: text.trim(),
+                            done: false,
+                            current: false,
+                            repeating: false
+
+                        })).filter(t => t.text.length > 0); //skip empty tasks
+
+                        const hasCurrent = userData.tasks.some(t => t.current);
+                        if (!hasCurrent) {
+                            const firstNormal = newTaskEntries.find(t => !t.repeating);
+                            if (firstNormal) {
+                                userData.tasks.forEach( t => t.current = false); // reset current task
+                                firstNormal.current = true;
+                            }
+                        }
+
                         return {
                             ...prevTasks,
-                            [usernameKey]: { displayName: userData.displayName, tasks: updatedTasks }
+                            [usernameKey]: { displayName: userData.displayName, tasks: [...userData.tasks, ...newTaskEntries] }
+                        };
+                    });
+                }
+
+                if (cmd === "!repeat") {
+                    const taskText = parts.slice(1).join(" ");
+                    if (!taskText) return;
+
+                    setTasks((prevTasks) => {
+                        const userData = prevTasks[usernameKey] || { displayName, tasks: [] };
+
+                        const newTaskEntries = taskText.split(";").map(text => ({
+                            text: text.trim(),
+                            done: false,
+                            current: false,
+                            repeating: true
+                        })).filter(t => t.text.length > 0); //skip empty tasks
+
+                        const hasCurrent = userData.tasks.some(t => t.current);
+                        if (!hasCurrent) {
+                            const firstNormal = newTaskEntries.find(t => !t.repeating);
+                            if (firstNormal) firstNormal.current = true;
+                        }
+                        return {
+                            ...prevTasks,
+                            [usernameKey]: { displayName: userData.displayName, tasks: [...userData.tasks, ...newTaskEntries] }
+                        };
+                    });
+                }
+
+                if (cmd === "!current") {
+                    const index = parseInt(parts[1]) - 1;
+                    if (isNaN(index)) return;
+
+                    setTasks((prevTasks) => {
+                        const userData = prevTasks[usernameKey];
+                        if (!userData) return prevTasks;
+
+                        const userTasks = userData.tasks.map((task, i) => ({
+                            ...task,
+                            current: !task.repeating && i === index //only normal tasks can be current
+                        }));
+
+                        return {
+                            ...prevTasks,
+                            [usernameKey]: {
+                                ...userData,
+                                tasks: userTasks
+                            }
                         };
                     });
                 }
@@ -214,27 +325,98 @@ export default function TaskList() {
         };
     }, []);
 
+    // Autoscroll effect
+    useEffect(() => {
+        const container = containerRef.current;
+        const list = listRef.current;
+        if (!container || !list) return;
+
+        let scrollPosition = 0;
+        let scrollDirection = 1; // 1: down, -1: up
+        const step = 1; // pixels per step
+        const intervalTime = 20; // ms per step
+        const pauseTime = 1500; // ms pause at top/bottom
+
+        let scrollInterval;
+
+        function autoscroll() {
+            const maxScroll = list.scrollHeight - container.clientHeight;
+            if (maxScroll <= 0) return; // no scrolling needed
+
+            scrollPosition += step * scrollDirection;
+
+            if (scrollPosition >= maxScroll) {
+                scrollPosition = maxScroll;
+                scrollDirection = -1;
+                pauseScrolling();
+            } else if (scrollPosition <= 0) {
+                scrollPosition = 0;
+                scrollDirection = 1;
+                pauseScrolling();
+            }
+
+            list.style.transform = `translateY(${-scrollPosition}px)`;
+        }
+
+        function startScrolling() {
+            clearInterval(scrollInterval);
+            scrollInterval = setInterval(autoscroll, intervalTime);
+        }
+
+        function pauseScrolling() {
+            clearInterval(scrollInterval);
+            setTimeout(() => {
+                startScrolling();
+            }, pauseTime);
+        }
+
+        startScrolling();
+
+        // Cleanup on unmount or tasks change
+        return () => clearInterval(scrollInterval);
+
+    }, [tasks]); // restart scroll when tasks change
+
     return (
         <div className="tasklist-container">
             <h3 className="tasklist-title">Task List</h3>
             {Object.keys(tasks).length === 0 ? (
                 <p className="tasklist-empty">No tasks yet!</p>
             ) : (
-                Object.entries(tasks).map(([userKey, userData]) => (
-                    <div key={userKey} className="tasklist-user">
-                        <strong className="tasklist-username">{userData.displayName}</strong>
-                        <ul className="tasklist-items">
-                            {userData.tasks.map((task, i) => (
-                                <li
-                                    key={i}
-                                    className={`tasklist-item ${task.done ? "done" : ""}`}
-                                >
-                                    {i + 1}. {task.text}
-                                </li>
-                            ))}
-                        </ul>
+                <div className="tasklist-wrapper" ref={containerRef}>
+                    <div className="tasklist-scrollwrapper" ref={listRef}>
+                        {
+                        Object.entries(tasks).map(([userKey, userData]) => (
+                            <div key={userKey} className="tasklist-user">
+                                <strong className="tasklist-username">{userData.displayName}</strong>
+                                <ul className="tasklist-items">
+                                {/* Repeating tasks first (no numbers) */}
+                                    {userData.tasks
+                                        .filter(task => task.repeating)
+                                        .map((task, i) => (
+                                            <li 
+                                                key={`repeat-${i}`} 
+                                                className={`tasklist-item repeating ${task.done ? "done" : ""}`}
+                                            >
+                                                {task.text}
+                                            </li>
+                                        ))}
+
+                                {/* Normal tasks with current highlighted */}
+                                    {userData.tasks.map((task, i) => (
+                                        <li
+                                            key={i}
+                                            className={`tasklist-item ${task.done ? "done" : ""} ${task.current ? "current" : ""}`}
+                                        >
+                                            {i + 1}. {task.text}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))
+                        }
                     </div>
-                ))
+                </div>
             )}
         </div>
     );

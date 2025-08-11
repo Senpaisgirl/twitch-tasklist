@@ -2,6 +2,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&display=swap');
 
 .tasklist-container {
+    display: flex;
+    flex-direction: column;
     font-family: 'Baloo 2', cursive;
     background-color: rgba(255, 240, 245, 0.9); /*pastel pink */
     padding: 6px 15px;
@@ -13,6 +15,28 @@
     font-size: 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden; /* hide overflow */
+}
+
+.tasklist-wrapper {
+    flex-grow: 1;
+    overflow-y: auto; /* enable vertical scrolling */
+    padding-left: 10px;
+    position: relative;
+}
+
+.tasklist-scrollwrapper {
+  position: relative;   /* relative for transform */
+  height: 100%;
+  padding-left: 0;
+  overflow: visible;
+  scroll-behavior: smooth;
+  z-index: 0;
+}
+
+.tasklist-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 .tasklist-title {
@@ -20,6 +44,8 @@
     font-size: 22px;
     color: #d36b84; /*soft pink */
     text-align: center;
+    z-index: +1;
+    flex-shrink: 0;;
 }
 
 .tasklist-empty {
@@ -38,15 +64,55 @@
 
 .tasklist-items {
     margin: 0;
-    padding-left: 18px;
-    list-style: disc;
+    padding-left: 0;
+    list-style: none; /* no default bullets */
+}
+
+.tasklist-items::-webkit-scrollbar {
+    display: none; /* hide scrollbar */
 }
 
 .tasklist-item {
     color: #5b2b33; /*dark pink */
+    line-height: 1.5em;
 }
 
 .tasklist-item.done {
     text-decoration: line-through;
     color: #999; /* muted gray for completed tasks */;
+}
+
+.tasklist-item.repeating {
+    font-style: italic;
+    color: #a34b61; /*warmer pink tone */
+    list-style: none; /* no bullet for repeating tasks */
+    background-color: rgba(255, 240, 245, 0.6); /* subtle pastel background */
+    border-left: 4px solid rgba(255, 105, 135, 0.5); /* accent stripe */
+    padding: 2px 4px;
+    margin-bottom: 2px;
+}
+
+.tasklist-item.current {
+    position: relative;  /* needed for ::before */
+    font-weight: bold;
+    list-style-position: inside;
+    text-indent: -6px;  /* your bullet adjustment */
+    color: #5b2b33;
+    background: none;    /* remove background from original */
+    border-radius: 0;    /* remove radius from original */
+    box-shadow: none;    /* remove shadow from original */
+    padding: 2px 6px;    /* keep vertical padding */
+}
+
+.tasklist-item.current::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: -6px;      /* nudge left */
+    right: 0;
+    background-color: rgba(255, 228, 230, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(255, 105, 135, 0.4);
+    z-index: -1;     /* behind text */
 }
