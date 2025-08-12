@@ -238,20 +238,7 @@ export default function TaskList() {
                             .filter(i => i !== null);
 
                         const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
-                        if (doneIndex === undefined) {
-                            console.log("doneIndex is undefined! doneVisibleIndex:", doneVisibleIndex);
-                            return prevTasks;
-                        }
-
-                        console.log("=== !done command debug info ===");
-                        console.log("doneVisibleIndex (from user input):", doneVisibleIndex);
-                        console.log("nonRepeatingIndexes:", nonRepeatingIndexes);
-                        console.log("Mapped doneIndex (actual task index):", doneIndex);
-                        console.log("Task text to mark done:", userTasks[doneIndex].text);
-                        console.log("Full userTasks list with indices:");
-                        userTasks.forEach((t, i) =>
-                            console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)", "done:", t.done)
-                        );
+                        if (doneIndex === undefined) return prevTasks;
 
                         // Mark task done
                         userTasks[doneIndex] = { ...userTasks[doneIndex], done: true };
@@ -270,11 +257,6 @@ export default function TaskList() {
                             const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
                             if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
                         }
-
-                        console.log("Updated userTasks after marking done:");
-                        userTasks.forEach((t, i) =>
-                            console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)", "done:", t.done, "current:", t.current)
-                        );
 
                         return {
                             ...prevTasks,
