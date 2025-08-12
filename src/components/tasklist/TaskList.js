@@ -4,7 +4,58 @@ import { fetchAccessToken } from "../../utils/auth";
 import "./TaskList.css";
 
 export default function TaskList() {
-    const [tasks, setTasks] = useState({});
+    const testTasks = {
+        alice: {
+            displayName: "Alice",
+            tasks: [
+            { text: "Finish report", done: false, current: true, repeating: false },
+            { text: "Daily review", done: false, current: false, repeating: true }
+            ]
+        },
+        bob: {
+            displayName: "Bob",
+            tasks: [
+            { text: "Fix bug #42", done: true, current: false, repeating: false },
+            { text: "Weekly sync", done: false, current: true, repeating: false }
+            ]
+        },
+        charlie: {
+            displayName: "Charlie",
+            tasks: [
+            { text: "Update website", done: false, current: true, repeating: false }
+            ]
+        },
+        diana: {
+            displayName: "Diana",
+            tasks: [
+            { text: "Create artwork", done: false, current: true, repeating: false },
+            { text: "Backup files", done: false, current: false, repeating: true }
+            ]
+        },
+        ethan: {
+            displayName: "Ethan",
+            tasks: [
+            { text: "Test prototype", done: false, current: true, repeating: false }
+            ]
+        },
+        fiona: {
+            displayName: "Fiona",
+            tasks: [
+            { text: "Order supplies", done: true, current: false, repeating: false },
+            { text: "Clean workspace", done: false, current: true, repeating: false }
+            ]
+        },
+        george: {
+            displayName: "George",
+            tasks: [
+            { text: "Review PR", done: false, current: true, repeating: false },
+            { text: "Team meeting", done: false, current: false, repeating: true }
+            ]
+        }
+    };
+
+
+    const [tasks, setTasks] = useState(testTasks);
 
     const twitchClientRef = useRef(null);
 
@@ -428,8 +479,11 @@ export default function TaskList() {
                 <div className="tasklist-wrapper" ref={containerRef}>
                     <div className="tasklist-scrollwrapper" ref={listRef}>
                         {
-                        Object.entries(tasks).map(([userKey, userData]) => (
-                            <div key={userKey} className="tasklist-user">
+                        Object.entries(tasks).map(([userKey, userData], index) => (
+                            <div
+                                key={userKey}
+                                className={`tasklist-user ${index > 0 ? "with-divider" : ""}`}
+                            >
                                 <strong className="tasklist-username">{userData.displayName}</strong>
                                 <ul className="tasklist-items">
                                 {/* Repeating tasks first (no numbers) */}

@@ -57,6 +57,28 @@
     margin-bottom: 0px;
 }
 
+.tasklist-user.with-divider {
+    position: relative;
+    margin-top: 12px;
+    padding-top: 2px;
+
+}
+
+.tasklist-user.with-divider::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -10px;
+    right: -10px;
+    height: 0px;
+    border-radius: 1px;
+    border-top: 2px solid rgba(128, 128, 128, 0.4);
+}
+
+.tasklist-user:last-child {
+  padding-bottom: 20px;
+}
+
 .tasklist-username {
     font-size: 24px;
     color: #b5475e; /* muted pink */
