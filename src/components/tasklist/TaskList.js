@@ -157,29 +157,28 @@ export default function TaskList() {
 
                         const userTasks = [...userData.tasks];
 
-                        // Map visible (non-repeating) index to actual index
                         const nonRepeatingIndexes = userTasks
-                            .map((t, i) => (!t.repeating ? i : null))
-                            .filter(i => i !== null);
+                        .map((t, i) => (!t.repeating ? i : null))
+                        .filter(i => i !== null);
 
                         const actualIndex = nonRepeatingIndexes[visibleIndex];
                         if (actualIndex === undefined) return prevTasks;
 
-                        // Set current true only for this task, false for all others
                         const updatedTasks = userTasks.map((task, i) => ({
-                            ...task,
-                            current: i === actualIndex && !task.repeating,
+                        ...task,
+                        current: i === actualIndex && !task.repeating,
                         }));
 
                         return {
-                            ...prevTasks,
-                            [usernameKey]: {
-                                ...userData,
-                                tasks: updatedTasks,
-                            },
+                        ...prevTasks,
+                        [usernameKey]: {
+                            ...userData,
+                            tasks: updatedTasks,
+                        },
                         };
                     });
-                }
+                    }
+
 
                 if (cmd === "!deletetask") {
                     const inputIndex = parseInt(parts[1]) - 1;
@@ -223,7 +222,7 @@ export default function TaskList() {
                     if (newCurrentStr !== undefined) {
                         const parsedNewCurrentIndex = parseInt(newCurrentStr) - 1;
                         if (!isNaN(parsedNewCurrentIndex)) {
-                            newCurrentVisibleIndex = parsedNewCurrentIndex;
+                        newCurrentVisibleIndex = parsedNewCurrentIndex;
                         }
                     }
 
@@ -235,8 +234,8 @@ export default function TaskList() {
 
                         // Map visible (non-repeating) index to actual index
                         const nonRepeatingIndexes = userTasks
-                            .map((t, i) => (!t.repeating ? i : null))
-                            .filter(i => i !== null);
+                        .map((t, i) => (!t.repeating ? i : null))
+                        .filter(i => i !== null);
 
                         const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
                         if (doneIndex === undefined) return prevTasks;
@@ -244,30 +243,30 @@ export default function TaskList() {
                         userTasks[doneIndex] = { ...userTasks[doneIndex], done: true };
 
                         if (newCurrentVisibleIndex !== null) {
-                            const newCurrentIndex = nonRepeatingIndexes[newCurrentVisibleIndex];
-                            if (newCurrentIndex !== undefined) {
-                                userTasks[doneIndex].current = false; // reset old current
-                                if (!userTasks[newCurrentIndex].repeating) {
-                                    userTasks[newCurrentIndex].current = true; // set new current
-                                }
+                        const newCurrentIndex = nonRepeatingIndexes[newCurrentVisibleIndex];
+                        if (newCurrentIndex !== undefined) {
+                            userTasks[doneIndex].current = false;
+                            if (!userTasks[newCurrentIndex].repeating) {
+                            userTasks[newCurrentIndex].current = true;
                             }
+                        }
                         } else {
-                            // Otherwise pick first non-repeating, not done task as current
-                            userTasks[doneIndex].current = false; // reset current
+                        userTasks[doneIndex].current = false;
 
-                            const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
-                            if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
+                        const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
+                        if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
                         }
 
                         return {
-                            ...prevTasks,
-                            [usernameKey]: {
-                                ...userData,
-                                tasks: userTasks,
-                            },
+                        ...prevTasks,
+                        [usernameKey]: {
+                            ...userData,
+                            tasks: userTasks,
+                        },
                         };
                     });
-                }
+                    }
+
 
                 if (cmd === "!undone") {
                     const visibleIndex = parseInt(parts[1]) - 1;
@@ -281,8 +280,8 @@ export default function TaskList() {
 
                         // Map visible (non-repeating) index to actual index
                         const nonRepeatingIndexes = userTasks
-                            .map((t, i) => (!t.repeating ? i : null))
-                            .filter(i => i !== null);
+                        .map((t, i) => (!t.repeating ? i : null))
+                        .filter(i => i !== null);
 
                         const actualIndex = nonRepeatingIndexes[visibleIndex];
                         if (actualIndex === undefined) return prevTasks;
@@ -291,19 +290,20 @@ export default function TaskList() {
 
                         const hasCurrent = userTasks.some(t => t.current);
                         if (!hasCurrent) {
-                            userTasks.forEach(t => (t.current = false));
-                            userTasks[actualIndex].current = true; // set undone task as current
+                        userTasks.forEach(t => (t.current = false));
+                        userTasks[actualIndex].current = true;
                         }
 
                         return {
-                            ...prevTasks,
-                            [usernameKey]: {
-                                ...userData,
-                                tasks: userTasks,
-                            },
+                        ...prevTasks,
+                        [usernameKey]: {
+                            ...userData,
+                            tasks: userTasks,
+                        },
                         };
                     });
-                }
+                    }
+
 
                 if (cmd === "!clear") {
                     setTasks((prevTasks) => {
