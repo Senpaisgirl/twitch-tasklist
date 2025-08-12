@@ -60,6 +60,19 @@ export default function TaskList() {
                 console.log(`Connected to Twitch chat at ${address}:${port}`);
             });
 
+            twitchClientRef.current.on('disconnected', (reason) => {
+                console.log(`Disconnected: ${reason}`);
+            });
+
+            twitchClientRef.current.on('reconnect', () => {
+                console.log('Reconnecting...');
+            });
+
+            twitchClientRef.current.on('error', (err) => {
+                console.error('Error:', err);
+            });
+
+
             twitchClientRef.current.on("disconnected", (reason) => {
                 console.warn(`Disconnected from Twitch chat: ${reason}`);
             });
