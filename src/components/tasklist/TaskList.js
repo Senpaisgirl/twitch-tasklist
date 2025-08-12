@@ -55,7 +55,7 @@ export default function TaskList() {
     };
 
 
-    const [tasks, setTasks] = useState(testTasks);
+    const [tasks, setTasks] = useState({});
 
     const twitchClientRef = useRef(null);
 
