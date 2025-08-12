@@ -123,7 +123,6 @@ export default function TaskList() {
                 console.error('Error:', err);
             });
 
-
             twitchClientRef.current.on("disconnected", (reason) => {
                 console.warn(`Disconnected from Twitch chat: ${reason}`);
             });
@@ -230,10 +229,15 @@ export default function TaskList() {
                     });
                 }
 
-
                 if (cmd === "!deletetask") {
-                    const inputIndex = parseInt(parts[1]) - 1;
-                    if (isNaN(inputIndex)) return;
+                    const indicesStr = parts.slice(1).join(" ");
+                    if (!indicesStr) return;
+
+                    const visibleIndices = indicesStr
+                        .split(";")
+                        .map(t => parseInt(t.trim()) - 1)
+                        .filter(i => !isNaN(i));
+                    if (visibleIndices.length < 1) return;
 
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
@@ -241,16 +245,21 @@ export default function TaskList() {
 
                         const userTasks = [...userData.tasks];
 
+                        // Normal tasks only (no repeating)
                         const normalTaskIndices = userTasks
                             .map((task, idx) => ({ task, index: idx }))
                             .filter(({ task }) => !task.repeating)
                             .map(({ index }) => index);
 
-                        if (inputIndex < 0 || inputIndex >= normalTaskIndices.length) return prevTasks;
+                        // Sort descending to delete from the end to avoid index shifting
+                        visibleIndices.sort((a, b) => b - a);
 
-                        const trueIndex = normalTaskIndices[inputIndex];
-
-                        userTasks.splice(trueIndex, 1); // remove the task at the true index
+                        visibleIndices.forEach((inputIndex) => {
+                            if (inputIndex >= 0 && inputIndex < normalTaskIndices.length) {
+                                const trueIndex = normalTaskIndices[inputIndex];
+                                userTasks.splice(trueIndex, 1);
+                            }
+                        });
 
                         return {
                             ...prevTasks,
@@ -262,20 +271,57 @@ export default function TaskList() {
                     });
                 }
 
+                if (cmd === "!deleterepeat") {
+                    const indicesStr = parts.slice(1).join(" ");
+                    if (!indicesStr) return;
+
+                    const visibleIndices = indicesStr
+                        .split(";")
+                        .map(t => parseInt(t.trim()) - 1)
+                        .filter(i => !isNaN(i));
+                    if (visibleIndices.length < 1) return;
+
+                    setTasks((prevTasks) => {
+                        const userData = prevTasks[usernameKey];
+                        if (!userData) return prevTasks;
+
+                        let userTasks = [...userData.tasks];
+
+                        // Repeating tasks only
+                        const repeatingTaskIndices = userTasks
+                            .map((task, idx) => ({ task, index: idx }))
+                            .filter(({ task }) => task.repeating)
+                            .map(({ index }) => index);
+
+                        // Sort descending for safe deletion
+                        visibleIndices.sort((a, b) => b - a);
+
+                        visibleIndices.forEach((inputIndex) => {
+                            if (inputIndex >= 0 && inputIndex < repeatingTaskIndices.length) {
+                                const trueIndex = repeatingTaskIndices[inputIndex];
+                                userTasks.splice(trueIndex, 1);
+                            }
+                        });
+
+                        return {
+                            ...prevTasks,
+                            [usernameKey]: {
+                                ...userData,
+                                tasks: userTasks,
+                            },
+                        };
+                    });
+                }
+
                 if (cmd === "!done") {
-                    const restOfMessage = parts.slice(1).join(" ");
-                    const [doneStr, newCurrentStr] = restOfMessage.split(";").map(t => t.trim());
+                    const doneTasksStr = parts.slice(1).join(" ");
+                    if (!doneTasksStr) return;
 
-                    const doneVisibleIndex = parseInt(doneStr) - 1;
-                    if (isNaN(doneVisibleIndex)) return;
-
-                    let newCurrentVisibleIndex = null;
-                    if (newCurrentStr !== undefined) {
-                        const parsedNewCurrentIndex = parseInt(newCurrentStr) - 1;
-                        if (!isNaN(parsedNewCurrentIndex)) {
-                            newCurrentVisibleIndex = parsedNewCurrentIndex;
-                        }
-                    }
+                    const doneVisibleIndex = doneTasksStr
+                        .split(";")
+                        .map(t => parseInt(t.trim()) - 1)
+                        .filter(i => !isNaN(i));
+                    if (doneVisibleIndex.length < 1) return;
 
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
@@ -288,26 +334,21 @@ export default function TaskList() {
                             .map((t, i) => (!t.repeating ? i : null))
                             .filter(i => i !== null);
 
-                        const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
-                        if (doneIndex === undefined) return prevTasks;
-
-                        // Mark task done
-                        userTasks[doneIndex] = { ...userTasks[doneIndex], done: true };
-
-                        if (newCurrentVisibleIndex !== null) {
-                            const newCurrentIndex = nonRepeatingIndexes[newCurrentVisibleIndex];
-                            if (newCurrentIndex !== undefined) {
-                                userTasks[doneIndex].current = false;
-                                if (!userTasks[newCurrentIndex].repeating) {
-                                    userTasks[newCurrentIndex].current = true;
-                                }
+                        // Mark all specified tasks done
+                        doneVisibleIndices.forEach(doneVisibleIndex => {
+                            const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
+                            if (doneIndex !== undefined) {
+                                userTasks[doneIndex] = { ...userTasks[doneIndex], done: true, current: false };
                             }
-                        } else {
-                            userTasks[doneIndex].current = false;
+                        });
 
-                            const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
-                            if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
+                        // Remove old newCurrent logic, instead set first not done as current
+                        const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
+                        userTasks.forEach(t => (t.current = false));
+                        if (firstNotDone !== -1) {
+                            userTasks[firstNotDone].current = true;
                         }
+                        // else leave all current false
 
                         return {
                             ...prevTasks,
@@ -319,11 +360,15 @@ export default function TaskList() {
                     });
                 }
 
-
-
                 if (cmd === "!undone") {
-                    const visibleIndex = parseInt(parts[1]) - 1;
-                    if (isNaN(visibleIndex)) return;
+                    const undoneTasksStr = parts.slice(1).join(" ");
+                    if (!undoneTasksStr) return;
+
+                    const undoneVisibleIndices = undoneTasksStr
+                        .split(";")
+                        .map(t => parseInt(t.trim()) - 1)
+                        .filter(i => !isNaN(i));
+                    if (undoneVisibleIndices.length < 1) return;
 
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
@@ -336,23 +381,29 @@ export default function TaskList() {
                         .map((t, i) => (!t.repeating ? i : null))
                         .filter(i => i !== null);
 
-                        const actualIndex = nonRepeatingIndexes[visibleIndex];
-                        if (actualIndex === undefined) return prevTasks;
-
-                        userTasks[actualIndex] = { ...userTasks[actualIndex], done: false, current: false };
+                        // Mark all specified tasks undone
+                        undoneVisibleIndices.forEach(visibleIndex => {
+                            const actualIndex = nonRepeatingIndexes[visibleIndex];
+                            if (actualIndex !== undefined) {
+                                userTasks[actualIndex] = { ...userTasks[actualIndex], done: false, current: false };
+                            }
+                        });
 
                         const hasCurrent = userTasks.some(t => t.current);
                         if (!hasCurrent) {
-                        userTasks.forEach(t => (t.current = false));
-                        userTasks[actualIndex].current = true;
+                            const firstUndone = userTasks.findIndex(t => !t.done && !t.repeating);
+                            if (firstUndone !== -1) {
+                                userTasks.forEach(t => (t.current = false));
+                                userTasks[firstUndone].current = true;
+                            }
                         }
 
                         return {
-                        ...prevTasks,
-                        [usernameKey]: {
-                            ...userData,
-                            tasks: userTasks,
-                        },
+                            ...prevTasks,
+                            [usernameKey]: {
+                                ...userData,
+                                tasks: userTasks,
+                            },
                         };
                     });
                     }
@@ -388,33 +439,33 @@ export default function TaskList() {
             });
 
             if (twitchClientRef.current.readyState() !== "OPEN") {
-            try {
-                await twitchClientRef.current.connect();
-            } catch (error) {
-                console.error("Failed to connect Twitch client:", error);
+                try {
+                    await twitchClientRef.current.connect();
+                } catch (error) {
+                    console.error("Failed to connect Twitch client:", error);
+                }
             }
-        }
         }
 
         initClient();
 
         return () => {
             async function cleanup() {
-            if (twitchClientRef.current) {
-                // Fix: disconnect only if connection is open
-                if (twitchClientRef.current.readyState() === "OPEN") {
-                    try {
-                        await twitchClientRef.current.disconnect();
-                    } catch (err) {
-                        // ignore error if disconnect fails
-                        console.warn("Error disconnecting Twitch client:", err);
+                if (twitchClientRef.current) {
+                    // Fix: disconnect only if connection is open
+                    if (twitchClientRef.current.readyState() === "OPEN") {
+                        try {
+                            await twitchClientRef.current.disconnect();
+                        } catch (err) {
+                            // ignore error if disconnect fails
+                            console.warn("Error disconnecting Twitch client:", err);
+                        }
                     }
+                    twitchClientRef.current.removeAllListeners();
+                    twitchClientRef.current = null;
                 }
-                twitchClientRef.current.removeAllListeners();
-                twitchClientRef.current = null;
             }
-        }
-        cleanup();
+            cleanup();
         };
     }, []);
 
