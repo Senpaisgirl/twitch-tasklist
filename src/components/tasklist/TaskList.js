@@ -177,7 +177,7 @@ export default function TaskList() {
                         },
                         };
                     });
-                    }
+                }
 
 
                 if (cmd === "!deletetask") {
@@ -222,7 +222,7 @@ export default function TaskList() {
                     if (newCurrentStr !== undefined) {
                         const parsedNewCurrentIndex = parseInt(newCurrentStr) - 1;
                         if (!isNaN(parsedNewCurrentIndex)) {
-                        newCurrentVisibleIndex = parsedNewCurrentIndex;
+                            newCurrentVisibleIndex = parsedNewCurrentIndex;
                         }
                     }
 
@@ -234,46 +234,58 @@ export default function TaskList() {
 
                         // Map visible (non-repeating) index to actual index
                         const nonRepeatingIndexes = userTasks
-                        .map((t, i) => (!t.repeating ? i : null))
-                        .filter(i => i !== null);
+                            .map((t, i) => (!t.repeating ? i : null))
+                            .filter(i => i !== null);
 
                         const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
-                        if (doneIndex === undefined) return prevTasks;
+                        if (doneIndex === undefined) {
+                            console.log("doneIndex is undefined! doneVisibleIndex:", doneVisibleIndex);
+                            return prevTasks;
+                        }
 
+                        console.log("=== !done command debug info ===");
+                        console.log("doneVisibleIndex (from user input):", doneVisibleIndex);
+                        console.log("nonRepeatingIndexes:", nonRepeatingIndexes);
+                        console.log("Mapped doneIndex (actual task index):", doneIndex);
+                        console.log("Task text to mark done:", userTasks[doneIndex].text);
+                        console.log("Full userTasks list with indices:");
+                        userTasks.forEach((t, i) =>
+                            console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)", "done:", t.done)
+                        );
+
+                        // Mark task done
                         userTasks[doneIndex] = { ...userTasks[doneIndex], done: true };
 
                         if (newCurrentVisibleIndex !== null) {
-                        const newCurrentIndex = nonRepeatingIndexes[newCurrentVisibleIndex];
-                        if (newCurrentIndex !== undefined) {
-                            userTasks[doneIndex].current = false;
-                            if (!userTasks[newCurrentIndex].repeating) {
-                            userTasks[newCurrentIndex].current = true;
+                            const newCurrentIndex = nonRepeatingIndexes[newCurrentVisibleIndex];
+                            if (newCurrentIndex !== undefined) {
+                                userTasks[doneIndex].current = false;
+                                if (!userTasks[newCurrentIndex].repeating) {
+                                    userTasks[newCurrentIndex].current = true;
+                                }
                             }
-                        }
                         } else {
-                        userTasks[doneIndex].current = false;
+                            userTasks[doneIndex].current = false;
 
-                        const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
-                        if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
+                            const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
+                            if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
                         }
 
-                        console.log("User Tasks:");
-                        userTasks.forEach((t, i) => console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)"));
-
-                        console.log("Visible (non-repeating) task indices:", nonRepeatingIndexes);
-                        console.log("doneVisibleIndex:", doneVisibleIndex);
-                        console.log("Mapped doneIndex:", doneIndex);
-
+                        console.log("Updated userTasks after marking done:");
+                        userTasks.forEach((t, i) =>
+                            console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)", "done:", t.done, "current:", t.current)
+                        );
 
                         return {
-                        ...prevTasks,
-                        [usernameKey]: {
-                            ...userData,
-                            tasks: userTasks,
-                        },
+                            ...prevTasks,
+                            [usernameKey]: {
+                                ...userData,
+                                tasks: userTasks,
+                            },
                         };
                     });
-                    }
+                }
+
 
 
                 if (cmd === "!undone") {
