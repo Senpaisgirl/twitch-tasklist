@@ -400,7 +400,7 @@ export default function TaskList() {
                                         ))}
 
                                 {/* Normal tasks with current highlighted */}
-                                    {userData.tasks.map((task, i) => (
+                                    {userData.tasks.filter(task => !task.repeating).map((task, i) => (
                                         <li
                                             key={i}
                                             className={`tasklist-item ${task.done ? "done" : ""} ${task.current ? "current" : ""}`}
