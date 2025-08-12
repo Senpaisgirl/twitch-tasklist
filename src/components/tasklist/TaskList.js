@@ -315,13 +315,6 @@ export default function TaskList() {
 
                 if (cmd === "!done") {
                     const doneTasksStr = parts.slice(1).join(" ");
-                    if (!doneTasksStr) return;
-
-                    const doneVisibleIndex = doneTasksStr
-                        .split(";")
-                        .map(t => parseInt(t.trim()) - 1)
-                        .filter(i => !isNaN(i));
-                    if (doneVisibleIndex.length < 1) return;
 
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
@@ -334,13 +327,27 @@ export default function TaskList() {
                             .map((t, i) => (!t.repeating ? i : null))
                             .filter(i => i !== null);
 
-                        // Mark all specified tasks done
-                        doneVisibleIndices.forEach(doneVisibleIndex => {
-                            const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
-                            if (doneIndex !== undefined) {
-                                userTasks[doneIndex] = { ...userTasks[doneIndex], done: true, current: false };
+                        if (!doneTasksStr) {
+                            // No task number given, mark current task as done
+                            const currentIndex = userTasks.findIndex(t => t.current && !t.repeating);
+                            if (currentIndex !== -1) {
+                                userTasks[currentIndex] = { ...userTasks[currentIndex], done: true, current: false };
                             }
-                        });
+                        } else {
+                            // Handle multiple indices separated by ;
+                            const doneVisibleIndices = doneTasksStr
+                                .split(";")
+                                .map(t => parseInt(t.trim()) - 1)
+                                .filter(i => !isNaN(i));
+                            if (doneVisibleIndices.length < 1) return prevTasks;
+
+                            doneVisibleIndices.forEach(doneVisibleIndex => {
+                                const doneIndex = nonRepeatingIndexes[doneVisibleIndex];
+                                if (doneIndex !== undefined) {
+                                    userTasks[doneIndex] = { ...userTasks[doneIndex], done: true, current: false };
+                                }
+                            });
+                        }
 
                         // Remove old newCurrent logic, instead set first not done as current
                         const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
