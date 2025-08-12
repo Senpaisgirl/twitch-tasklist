@@ -90,7 +90,7 @@
     color: #a34b61; /*warmer pink tone */
     list-style: none; /* no bullet for repeating tasks */
     border-left: 4px solid rgba(255, 105, 135, 0.5); /* accent stripe */
-    padding: 2px 4px;
+    padding: 2px 2px;
     margin-bottom: 2px;
 }
 
