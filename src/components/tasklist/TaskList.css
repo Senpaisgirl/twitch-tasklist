@@ -12,7 +12,7 @@
     width: 359px;
     height: 656px;
     color: #5b2b33; /*dark pink text */
-    font-size: 21px;
+    font-size: 23px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     box-sizing: border-box;
     position: relative;
@@ -41,7 +41,7 @@
 
 .tasklist-title {
     margin: 0 0 0px;
-    font-size: 27px;
+    font-size: 29px;
     color: #d36b84; /*soft pink */
     text-align: center;
     z-index: +1;
@@ -58,7 +58,7 @@
 }
 
 .tasklist-username {
-    font-size: 22px;
+    font-size: 24px;
     color: #b5475e; /* muted pink */
 }
 
