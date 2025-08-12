@@ -221,7 +221,7 @@ export default function TaskList() {
                             //otherwise pick first non-repeating task as current
                             userTasks[doneIndex].current = false; //reset
                             const firstNotDone = userTasks.findIndex(t => !t.done && !t.repeating);
-                            if (firstNotDone) firstNotDone.current = true;
+                            if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
                         }
 
                         return {
