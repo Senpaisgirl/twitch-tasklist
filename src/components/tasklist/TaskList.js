@@ -257,6 +257,14 @@ export default function TaskList() {
                         if (firstNotDone !== -1) userTasks[firstNotDone].current = true;
                         }
 
+                        console.log("User Tasks:");
+                        userTasks.forEach((t, i) => console.log(i, t.text, t.repeating ? "(repeating)" : "(normal)"));
+
+                        console.log("Visible (non-repeating) task indices:", nonRepeatingIndexes);
+                        console.log("doneVisibleIndex:", doneVisibleIndex);
+                        console.log("Mapped doneIndex:", doneIndex);
+
+
                         return {
                         ...prevTasks,
                         [usernameKey]: {
