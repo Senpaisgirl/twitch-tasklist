@@ -89,7 +89,6 @@
     font-style: italic;
     color: #a34b61; /*warmer pink tone */
     list-style: none; /* no bullet for repeating tasks */
-    background-color: rgba(255, 240, 245, 0.6); /* subtle pastel background */
     border-left: 4px solid rgba(255, 105, 135, 0.5); /* accent stripe */
     padding: 2px 4px;
     margin-bottom: 2px;
