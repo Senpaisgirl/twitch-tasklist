@@ -171,14 +171,26 @@ export default function TaskList() {
                 }
 
                 if (cmd === "!deletetask") {
-                    const index = parseInt(parts[1]) - 1;
-                    if (isNaN(index)) return;
+                    const inputIndex = parseInt(parts[1]) - 1;
+                    if (isNaN(inputIndex)) return;
+
                     setTasks((prevTasks) => {
                         const userData = prevTasks[usernameKey];
                         if (!userData) return prevTasks;
+
                         const userTasks = [...userData.tasks];
-                        if (index < 0 || index >= userTasks.length) return prevTasks;
-                        userTasks.splice(index, 1);
+
+                        const normalTaskIndices = userTasks
+                            .map((task, idx) => ({ task, index: idx }))
+                            .filter(({ task }) => !task.repeating)
+                            .map(({ index }) => index);
+
+                        if (inputIndex < 0 || inputIndex >= normalTaskIndices.length) return prevTasks;
+
+                        const trueIndex = normalTaskIndices[inputIndex];
+
+                        userTasks.splice(trueIndex, 1); // remove the task at the true index
+                        
                         return {
                             ...prevTasks,
                             [usernameKey]: {
